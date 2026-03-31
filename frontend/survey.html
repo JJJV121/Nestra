@@ -10,6 +10,7 @@
     :root {
       --primary: #6c5dd3;
       --secondary: #463aa2;
+      --gradient: linear-gradient(135deg, #6c5dd3, #463aa2);
       --accent: #f3f0ff;
       --dark: #2d2d39;
       --white: #fff;
@@ -32,8 +33,9 @@
     }
 
     .topbar {
-      background-color: var(--primary);
-      color: var(--white);
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.7);
+      border-bottom: 1px solid rgba(108, 93, 211, 0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -41,22 +43,24 @@
       position: sticky;
       top: 0;
       z-index: 999;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 20px rgba(108, 93, 211, 0.08);
       user-select: none;
     }
 
     .logo {
       font-size: 1.8rem;
       font-weight: 700;
-      color: var(--white);
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       letter-spacing: 1.5px;
     }
 
     .nav-toggle {
       display: none;
       font-size: 1.5rem;
-      color: var(--white);
       cursor: pointer;
+      color: var(--dark);
       user-select: none;
     }
 
@@ -67,14 +71,32 @@
     }
 
     .dropdown-menu li a {
-      color: var(--white);
       text-decoration: none;
+      color: var(--secondary);
       font-weight: 600;
-      transition: color 0.25s ease;
+      font-size: 0.95rem;
+      position: relative;
+      transition: color 0.25s;
+    }
+
+    .dropdown-menu li a::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 2px;
+      background: var(--gradient);
+      left: 0;
+      bottom: -4px;
+      transition: 0.3s ease;
+      border-radius: 2px;
     }
 
     .dropdown-menu li a:hover {
-      color: #d1ccf2;
+      color: var(--primary);
+    }
+
+    .dropdown-menu li a:hover::after {
+      width: 100%;
     }
 
     .form-container {
@@ -221,7 +243,7 @@
       }
 
       .dropdown-menu li a {
-        color: var(--dark);
+        color: var(--secondary);
         font-weight: 700;
       }
 

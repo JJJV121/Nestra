@@ -719,10 +719,10 @@
       <div class="kpi-change up">↑ +0.3</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-icon">⏱️</div>
-      <div class="kpi-number" data-target="4" data-suffix="m">0m</div>
-      <div class="kpi-label">Avg Survey Time</div>
-      <div class="kpi-change down">↓ −30 sec</div>
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-number" data-target="0">0</div>
+      <div class="kpi-label">Surveys Done</div>
+      <div class="kpi-change up">↑ Latest Data</div>
     </div>
   </div>
 
@@ -1098,10 +1098,44 @@
     }
 
     buildHeatmap();
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { document.querySelectorAll('.kpi-number').forEach(animateCounter); animateBars(); animateProgress(); animateRings(); obs.disconnect(); } });
-    }, { threshold: 0.1 });
-    obs.observe(document.querySelector('.kpi-grid'));
+
+    // Fetch real stats
+    fetch('../backend/fetch_stats.php')
+      .then(res => res.json())
+      .then(data => {
+        // Update KPI targets
+        const kpiNums = document.querySelectorAll('.kpi-number');
+        if (kpiNums.length >= 5) {
+          kpiNums[0].dataset.target = data.total_users; // Total Users
+          kpiNums[1].dataset.target = data.matches_made; // Matches Made
+          kpiNums[2].dataset.target = data.avg_compatibility; // Avg Compatibility
+          kpiNums[3].dataset.target = data.feedback_score; // Feedback Score
+          kpiNums[4].dataset.target = data.surveys_done; // Surveys Done
+          kpiNums[4].dataset.suffix = ''; // Remove suffix if present
+        }
+
+        // Start observers
+        const obs = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              document.querySelectorAll('.kpi-number').forEach(animateCounter);
+              animateBars();
+              animateProgress();
+              animateRings();
+              obs.disconnect();
+            }
+          });
+        }, { threshold: 0.1 });
+        obs.observe(document.querySelector('.kpi-grid'));
+      })
+      .catch(err => {
+        console.error("Error fetching stats", err);
+        // Fallback animation
+        const obs = new IntersectionObserver(entries => {
+          entries.forEach(e => { if (e.isIntersecting) { document.querySelectorAll('.kpi-number').forEach(animateCounter); animateBars(); animateProgress(); animateRings(); obs.disconnect(); } });
+        }, { threshold: 0.1 });
+        obs.observe(document.querySelector('.kpi-grid'));
+      });
   </script>
 </body>
 

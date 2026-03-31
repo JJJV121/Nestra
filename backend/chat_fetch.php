@@ -50,6 +50,10 @@ while ($row = $result->fetch_assoc()) {
 }
 
 $stmt->close();
+
+// Mark these messages as read since they are being fetched by the receiver
+@$conn->query("UPDATE messages SET is_read = 1 WHERE receiver_id = $me AND sender_id = $receiver_id AND is_read = 0");
+
 $conn->close();
 echo json_encode(['messages' => $messages, 'me' => $me]);
 ?>

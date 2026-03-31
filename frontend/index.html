@@ -105,7 +105,8 @@
       font-size: 1.3rem;
       color: #5e5c7a;
       max-width: 700px;
-      margin: 0 auto 2rem;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
     }
 
     .btn-primary {
@@ -216,6 +217,20 @@
     <h2 class="logo">Nestra</h2>
     <div class="nav-toggle" onclick="toggleMenu()">☰</div>
     <ul class="dropdown-menu" id="dropdownMenu">
+      <li>
+        <a href="match_chat.html" id="navChatIcon"
+          style="display: flex; align-items: center; gap: 0.4em; color: var(--secondary); position: relative;">
+          <span style="display: flex; align-items: center; position: relative;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span id="chatBadge"
+              style="display:none; position:absolute; top:-5px; right:-8px; background:red; color:white; font-size:0.6rem; font-weight:bold; padding:2px 5px; border-radius:10px;">0</span>
+          </span>
+          Chats
+        </a>
+      </li>
       <li><a href="login.html" style="color: var(--secondary);">Login</a></li>
       <li><a href="register.html" style="color: var(--secondary);">Register</a></li>
       <li><a href="survey.html" style="color: var(--secondary);">Survey</a></li>
@@ -250,17 +265,46 @@
 
   <section class="features">
     <div class="feature-box">
-      <h3>📋 Smart Compatibility Quiz</h3>
+      <h3>📋 Smart Compatibility</h3>
       <p>Answer thoughtfully crafted questions about your lifestyle, habits, and preferences to help us find your most
         compatible roommate.</p>
     </div>
     <div class="feature-box">
       <h3>🤖 AI Matchmaking</h3>
-      <p>Get matched based on habits, personality, sleep cycles, room preferences and more.</p>
+      <p>Get matched based on habits, personality, sleep cycles, room preferences and more using advanced algorithms.
+      </p>
     </div>
     <div class="feature-box">
-      <h3>🏠 Room Assignment</h3>
-      <p>Your perfect twin-sharing or single room setup — matched to needs, location, and compatibility.</p>
+      <h3>🏠 Co-Living Hub</h3>
+      <p>Manage shared expenses, assign chores, and view AI-generated roommate agreements seamlessly.</p>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section style="padding: 80px 20px; background: var(--white); text-align: center;">
+    <h2 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 3rem; font-weight: 800;">How It Works</h2>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 3rem; max-width: 1200px; margin: auto;">
+      <div style="flex: 1; min-width: 250px;">
+        <div
+          style="width: 80px; height: 80px; background: var(--gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin: 0 auto 1.5rem; box-shadow: 0 10px 20px rgba(108,93,211,0.3);">
+          1</div>
+        <h4 style="font-size:1.3rem; margin-bottom: 10px; color: var(--dark);">Take the Survey</h4>
+        <p style="color: #666;">Tell us about your sleep patterns, sociability, and living habits.</p>
+      </div>
+      <div style="flex: 1; min-width: 250px;">
+        <div
+          style="width: 80px; height: 80px; background: var(--gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin: 0 auto 1.5rem; box-shadow: 0 10px 20px rgba(108,93,211,0.3);">
+          2</div>
+        <h4 style="font-size:1.3rem; margin-bottom: 10px; color: var(--dark);">Get Matched</h4>
+        <p style="color: #666;">Our AI pairs you with the most mathematically compatible roommate.</p>
+      </div>
+      <div style="flex: 1; min-width: 250px;">
+        <div
+          style="width: 80px; height: 80px; background: var(--gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin: 0 auto 1.5rem; box-shadow: 0 10px 20px rgba(108,93,211,0.3);">
+          3</div>
+        <h4 style="font-size:1.3rem; margin-bottom: 10px; color: var(--dark);">Connect & Live</h4>
+        <p style="color: #666;">Chat instantly, accept your match, and manage life in the Co-Living Hub.</p>
+      </div>
     </div>
   </section>
 
@@ -280,6 +324,35 @@
         menu.classList.remove("show");
       }
     });
+
+    // ── Notifications Polling ──
+    async function checkNotifications() {
+      try {
+        const res = await fetch('../backend/notifications.php');
+        const data = await res.json();
+
+        const badge = document.getElementById('chatBadge');
+        const icon = document.getElementById('navChatIcon');
+
+        if (data.unread > 0) {
+          badge.style.display = 'inline-block';
+          badge.textContent = data.unread;
+          // Dynamically route them to the chat of the person who just messaged them
+          if (data.sender_id) {
+            icon.href = `match_chat.html?with=${data.sender_id}&name=${encodeURIComponent(data.sender_name)}`;
+          }
+        } else {
+          badge.style.display = 'none';
+          // Fallback to match engine logic if no specific unread message
+          icon.href = 'match_chat.html';
+        }
+      } catch (err) { }
+    }
+
+    // Check on load
+    checkNotifications();
+    // Then every 10 seconds
+    setInterval(checkNotifications, 10000);
   </script>
 
   <!-- Floating Chatbot Button -->

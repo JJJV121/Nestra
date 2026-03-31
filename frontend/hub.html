@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Living Hub – Nestra</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5dd3;
+            --secondary: #463aa2;
+            --gradient: linear-gradient(135deg, #6c5dd3, #463aa2);
+            --accent: #f3f0ff;
+            --white: #fff;
+            --dark: #2d2d39;
+            --border: rgba(108, 93, 211, 0.12)
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(120deg, #eae8ff, #f7f5ff);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column
+        }
+
+        .topbar {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            border-bottom: 1px solid rgba(108, 93, 211, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 20px rgba(108, 93, 211, 0.08)
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .nav-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark)
+        }
+
+        .dropdown-menu {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem
+        }
+
+        .dropdown-menu li a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            transition: color .25s
+        }
+
+        .dropdown-menu li a:hover {
+            color: var(--primary)
+        }
+
+        .hub-header {
+            background: var(--gradient);
+            padding: 50px 20px;
+            text-align: center;
+            color: #fff
+        }
+
+        .hub-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: .5rem
+        }
+
+        .hub-header p {
+            opacity: .9;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto
+        }
+
+        .dashboard {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            width: 100%
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 12px 35px rgba(108, 93, 211, 0.08);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            color: var(--secondary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            padding-bottom: .8rem;
+            border-bottom: 2px solid var(--accent)
+        }
+
+        /* Agreement Card */
+        .rule-item {
+            background: #fafaff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+            font-size: .95rem;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(108, 93, 211, 0.05)
+        }
+
+        /* Chore Card */
+        .chore-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            background: #fff;
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: transform .2s
+        }
+
+        .chore-item:hover {
+            transform: translateX(4px);
+            border-color: var(--primary)
+        }
+
+        .chore-item.done {
+            opacity: .6;
+            background: #f3f0ff;
+            text-decoration: line-through
+        }
+
+        .chore-info strong {
+            display: block;
+            font-size: .95rem
+        }
+
+        .chore-info span {
+            font-size: .8rem;
+            color: #777
+        }
+
+        .chore-toggle {
+            background: var(--accent);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .chore-toggle:hover {
+            background: var(--primary);
+            color: #fff
+        }
+
+        /* Expenses Card */
+        .expense-balance {
+            text-align: center;
+            padding: 18px;
+            background: var(--accent);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem
+        }
+
+        .owed {
+            color: #059669;
+            background: #ecfdf5
+        }
+
+        .owe {
+            color: #dc2626;
+            background: #fef2f2
+        }
+
+        .settled {
+            color: var(--primary)
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--accent)
+        }
+
+        .expense-item:last-child {
+            border-bottom: none
+        }
+
+        .expense-desc strong {
+            display: block;
+            font-size: .95rem
+        }
+
+        .expense-desc span {
+            font-size: .8rem;
+            color: #777
+        }
+
+        .expense-amount {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 1.1rem
+        }
+
+        /* Forms */
+        .add-form {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 2px solid var(--accent)
+        }
+
+        .add-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: .9rem
+        }
+
+        .add-select {
+            padding: 10px;
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600
+        }
+
+        .add-btn {
+            background: var(--gradient);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0 16px;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        @media(max-width:768px) {
+            .nav-toggle {
+                display: block
+            }
+
+            .dropdown-menu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                right: 20px;
+                background: var(--white);
+                padding: 16px;
+                border-radius: 14px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, .1);
+                min-width: 180px
+            }
+
+            .dropdown-menu.show {
+                display: flex
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="topbar">
+        <div class="logo">Nestra</div>
+        <div class="nav-toggle" onclick="toggleMenu()">☰</div>
+        <ul class="dropdown-menu" id="dropdownMenu">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="match_result.html">Match</a></li>
+            <li><a href="match_chat.html" id="chatLink">Chat</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+
+    <header class="hub-header">
+        <h1>🏠 Co-Living Hub</h1>
+        <p>Manage chores, split expenses, and review your Smart Roommate Agreement with <strong id="headName">your
+                match</strong>.</p>
+    </header>
+
+    <div class="dashboard">
+
+        <!-- 1. Smart Agreement -->
+        <div class="card">
+            <h2>📜 Smart Roommate Agreement</h2>
+            <div id="agreementList">
+                <div style="text-align:center;padding:20px;color:#777">Drafting AI rules...</div>
+            </div>
+            <p style="font-size:0.8rem;color:#999;margin-top:auto;text-align:center;padding-top:1rem">
+                Auto-generated by Nestra AI 🧠 based on both of your survey answers.
+            </p>
+        </div>
+
+        <!-- 2. Chore Allocator -->
+        <div class="card">
+            <h2>🧹 Chore Allocator</h2>
+            <div style="flex:1;overflow-y:auto;max-height:300px;margin-bottom:1rem" id="choreList">
+            </div>
+
+            <form class="add-form" id="choreForm">
+                <input type="text" id="choreTitle" class="add-input" placeholder="New chore (e.g. Take out trash)"
+                    required />
+                <select id="choreAssign" class="add-select"></select>
+                <button type="submit" class="add-btn">+</button>
+            </form>
+        </div>
+
+        <!-- 3. Expenses -->
+        <div class="card">
+            <h2>💸 Shared Expenses</h2>
+            <div class="expense-balance" id="expenseBalance">Calculating...</div>
+            <div style="flex:1;overflow-y:auto;max-height:240px;margin-bottom:1rem" id="expenseList">
+            </div>
+
+            <form class="add-form" id="expenseForm">
+                <input type="text" id="expDesc" class="add-input" placeholder="What (e.g. Groceries)" required />
+                <input type="number" id="expAmt" class="add-input" style="width:100px;flex:none" placeholder="₹0"
+                    min="1" required />
+                <button type="submit" class="add-btn">Add</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleMenu() { document.getElementById("dropdownMenu").classList.toggle("show") }
+
+        let withId = 0;
+        let meId = 0;
+
+        async function loadHub() {
+            const params = new URLSearchParams(window.location.search);
+            withId = parseInt(params.get('with')) || 0;
+            if (!withId) {
+                alert("Missing roommate ID in URL. Go back to your Match list."); return;
+            }
+
+            const name = params.get('name') || "your match";
+            document.getElementById('headName').textContent = name;
+            document.getElementById('chatLink').href = `match_chat.html?with=${withId}&name=${encodeURIComponent(name)}`;
+
+            const res = await fetch(`../backend/hub_api.php?with=${withId}&action=get_all`);
+            const data = await res.json();
+            if (data.error) {
+                alert("Error loading hub: " + data.error); return;
+            }
+
+            meId = data.me;
+
+            // Assign Select Dropdown
+            const sel = document.getElementById('choreAssign');
+            sel.innerHTML = `<option value="${meId}">Me</option><option value="${withId}">${data.names[withId]}</option>`;
+
+            // 1. Rules
+            document.getElementById('agreementList').innerHTML = data.rules.map(r => `<div class="rule-item">${r}</div>`).join('');
+
+            // 2. Chores
+            if (data.chores.length === 0) {
+                document.getElementById('choreList').innerHTML = '<p style="text-align:center;color:#999;padding:20px">No chores added yet!</p>';
+            } else {
+                document.getElementById('choreList').innerHTML = data.chores.map(c => `
+          <div class="chore-item ${c.status === 'Done' ? 'done' : ''}">
+            <div class="chore-info">
+              <strong>${c.title}</strong>
+              <span>${c.assignee} · ${c.status === 'Done' ? 'Completed' : 'Pending'}</span>
+            </div>
+            <button class="chore-toggle" onclick="toggleChore(${c.id})">✓</button>
+          </div>
+        `).join('');
+            }
+
+            // 3. Expenses
+            const bal = document.getElementById('expenseBalance');
+            bal.innerHTML = data.owed_text;
+            bal.className = 'expense-balance ' + data.owed_class;
+
+            if (data.expenses.length === 0) {
+                document.getElementById('expenseList').innerHTML = '<p style="text-align:center;color:#999;padding:20px">No shared expenses.</p>';
+            } else {
+                document.getElementById('expenseList').innerHTML = data.expenses.map(e => `
+          <div class="expense-item">
+            <div class="expense-desc">
+              <strong>${e.description}</strong>
+              <span>Paid by ${e.payer}</span>
+            </div>
+            <div class="expense-amount">₹${parseFloat(e.amount).toFixed(2)}</div>
+          </div>
+        `).join('');
+            }
+        }
+
+        async function postData(body) {
+            body.append('with', withId);
+            await fetch('../backend/hub_api.php', { method: 'POST', body });
+            loadHub();
+        }
+
+        document.getElementById('choreForm').onsubmit = e => {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('action', 'add_chore');
+            fd.append('title', document.getElementById('choreTitle').value);
+            fd.append('assigned_to', document.getElementById('choreAssign').value);
+            postData(fd);
+            e.target.reset();
+        };
+
+        document.getElementById('expenseForm').onsubmit = e => {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('action', 'add_expense');
+            fd.append('description', document.getElementById('expDesc').value);
+            fd.append('amount', document.getElementById('expAmt').value);
+            postData(fd);
+            e.target.reset();
+        };
+
+        function toggleChore(id) {
+            const fd = new FormData();
+            fd.append('action', 'toggle_chore');
+            fd.append('id', id);
+            postData(fd);
+        }
+
+        loadHub();
+    </script>
+</body>
+
+</html>

@@ -305,10 +305,10 @@
     }
 
     .actions {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
       margin-top: 1.5rem;
-      flex-wrap: wrap
     }
 
     .btn-primary {
@@ -652,6 +652,17 @@
           <div class="detail-grid" id="detailGrid"></div>
           <div class="actions">
             <a id="chatBtn" href="match_chat.html" class="btn-primary">💬 Chat with Match</a>
+
+            <a id="hubBtn" href="hub.html" class="btn-primary"
+              style="background:var(--accent);color:var(--primary);display:none;">🏠 Co-Living Hub</a>
+            <button id="acceptBtn" class="btn-primary" style="background:#059669;display:none;"
+              onclick="acceptMatch()">✅ Accept Match</button>
+            <button id="rejectBtn" class="btn-outline" style="border-color:#ef4444;color:#ef4444;display:none;"
+              onclick="rejectMatch()">❌ Reject</button>
+            <button id="pendingBtn" class="btn-primary"
+              style="background:#f3f4f6;color:#6b7280;cursor:not-allowed;display:none;" disabled>⏳ Waiting for
+              Match...</button>
+
             <a href="survey.html" class="btn-outline">🔁 Retake Survey</a>
           </div>
         </div>
@@ -724,21 +735,86 @@
       ).join('');
     }
 
+    let currentMatchId = null;
+
     function showBestMatch(match) {
+      currentMatchId = match.user_id;
       document.getElementById('bestCard').style.display = 'block';
       document.getElementById('matchName').textContent = match.fullname;
       document.getElementById('matchReason').innerHTML = '💡 <strong>Why this match?</strong> ' + match.reason;
       document.getElementById('heroSub').textContent =
         'Nestra found you a ' + match.compatibility + '% compatible roommate!';
 
-      // Set chat link with the matched user's ID so chat_fetch works correctly
-      document.getElementById('chatBtn').href =
-        'match_chat.html?with=' + match.user_id + '&name=' + encodeURIComponent(match.fullname);
+      // Set links with the matched user's ID
+      const queryStr = '?with=' + match.user_id + '&name=' + encodeURIComponent(match.fullname);
+      document.getElementById('chatBtn').href = 'match_chat.html' + queryStr;
+      document.getElementById('hubBtn').href = 'hub.html' + queryStr;
+
+      // Handle Accept / Hub states
+      document.getElementById('hubBtn').style.display = 'none';
+      document.getElementById('acceptBtn').style.display = 'none';
+      document.getElementById('pendingBtn').style.display = 'none';
+      document.getElementById('rejectBtn').style.display = 'none';
+
+      if (match.i_accepted && match.they_accepted) {
+        document.getElementById('hubBtn').style.display = 'flex'; // Unlocked!
+      } else if (match.i_accepted && !match.they_accepted) {
+        document.getElementById('pendingBtn').style.display = 'flex'; // Waiting
+      } else {
+        document.getElementById('acceptBtn').style.display = 'flex';  // Accept button
+        document.getElementById('rejectBtn').style.display = 'flex';  // Reject button
+      }
 
       // Map backend field names
       match.room_assigned = match.room;
       buildDetailGrid(match);
       setTimeout(() => animateRing(match.compatibility), 400);
+    }
+
+    async function acceptMatch() {
+      if (!currentMatchId) return;
+      document.getElementById('acceptBtn').textContent = "Accepting...";
+      document.getElementById('acceptBtn').disabled = true;
+
+      try {
+        const fd = new FormData();
+        fd.append('match_id', currentMatchId);
+        const res = await fetch('../backend/accept_match.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert('Error accepting match: ' + data.error);
+        }
+      } catch (e) {
+        alert('Connection error');
+      }
+      document.getElementById('acceptBtn').textContent = "✅ Accept Match";
+      document.getElementById('acceptBtn').disabled = false;
+    }
+
+    async function rejectMatch() {
+      if (!currentMatchId) return;
+      if (!confirm('Are you sure you want to reject this match? They will be permanently removed from your matches.')) return;
+
+      document.getElementById('rejectBtn').textContent = "Rejecting...";
+      document.getElementById('rejectBtn').disabled = true;
+
+      try {
+        const fd = new FormData();
+        fd.append('match_id', currentMatchId);
+        const res = await fetch('../backend/reject_match.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert('Error rejecting match: ' + data.error);
+        }
+      } catch (e) {
+        alert('Connection error');
+      }
+      document.getElementById('rejectBtn').textContent = "❌ Reject Match";
+      document.getElementById('rejectBtn').disabled = false;
     }
 
     function showError(title, msg) {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,12 +45,14 @@
       user-select: none;
       z-index: 999;
     }
+
     nav .logo {
       font-weight: 700;
       font-size: 1.8rem;
       letter-spacing: 1.5px;
       user-select: none;
     }
+
     nav .nav-toggle {
       display: none;
       font-size: 1.5rem;
@@ -57,17 +60,20 @@
       cursor: pointer;
       user-select: none;
     }
+
     ul.dropdown-menu {
       list-style: none;
       display: flex;
       gap: 1.5rem;
     }
+
     ul.dropdown-menu li a {
       color: var(--white);
       font-weight: 600;
       text-decoration: none;
       transition: color 0.25s ease;
     }
+
     ul.dropdown-menu li a:hover {
       color: #d1ccf2;
     }
@@ -113,7 +119,7 @@
       max-width: 70%;
       padding: 12px 18px;
       border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       word-wrap: break-word;
       white-space: pre-wrap;
     }
@@ -180,10 +186,12 @@
     .chat-messages::-webkit-scrollbar {
       width: 8px;
     }
+
     .chat-messages::-webkit-scrollbar-thumb {
       background: var(--primary);
       border-radius: 8px;
     }
+
     .chat-messages::-webkit-scrollbar-track {
       background: var(--input-bg);
     }
@@ -192,6 +200,7 @@
       nav .nav-toggle {
         display: block;
       }
+
       ul.dropdown-menu {
         position: absolute;
         top: 60px;
@@ -201,17 +210,20 @@
         display: none;
         padding: 18px 20px;
         border-radius: 14px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         user-select: none;
         z-index: 999;
       }
+
       ul.dropdown-menu.show {
         display: flex;
       }
+
       ul.dropdown-menu li a {
         color: var(--dark-bg);
         font-weight: 700;
       }
+
       .chatbot-container {
         margin: 20px 12px 40px;
         height: 500px;
@@ -219,6 +231,7 @@
     }
   </style>
 </head>
+
 <body>
   <nav class="topbar">
     <h2 class="logo">Nestra</h2>
@@ -237,10 +250,12 @@
       <li>
         <a href="profile.html" style="display: flex; align-items: center; gap: 0.4em;">
           <span style="display: flex; align-items: center;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-              <circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
-              <path d="M6.5 18c1.5-2 9.5-2 11 0" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              style="display:inline-block;vertical-align:middle;">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+              <circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="1.5" fill="none" />
+              <path d="M6.5 18c1.5-2 9.5-2 11 0" stroke="currentColor" stroke-width="1.5" fill="none"
+                stroke-linecap="round" />
             </svg>
           </span>
           Profile
@@ -256,16 +271,8 @@
       <div class="message bot">Hello! I'm Nexi, your friendly assistant. How can I help you today? 😊</div>
     </section>
     <form class="chat-input-area" id="chatForm" aria-label="Send message to chatbot">
-      <input
-        type="text"
-        id="chatInput"
-        class="chat-input"
-        autocomplete="off"
-        placeholder="Type your message..."
-        aria-label="Chat message input"
-        required
-        autofocus
-      />
+      <input type="text" id="chatInput" class="chat-input" autocomplete="off" placeholder="Type your message..."
+        aria-label="Chat message input" required autofocus />
       <button type="submit" class="send-btn" aria-label="Send message">Send</button>
     </form>
   </main>
@@ -275,7 +282,7 @@
       document.getElementById("dropdownMenu").classList.toggle("show");
     }
 
-    window.addEventListener("click", function(e) {
+    window.addEventListener("click", function (e) {
       const toggle = document.querySelector(".nav-toggle");
       const menu = document.getElementById("dropdownMenu");
       if (!toggle.contains(e.target) && !menu.contains(e.target)) {
@@ -295,44 +302,30 @@
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Extended list of questions and answers for Nexi chatbot
-    function getBotReply(message) {
-      const msg = message.toLowerCase();
+    // Function to handle sending message to backend
+    async function fetchBotReply(userMsg) {
+      try {
+        const params = new URLSearchParams();
+        params.append('message', userMsg);
 
-      const qa = [
-        { q: ['hello', 'hi', 'hey'], a: "Hello! 👋 How can I assist you today?" },
-        { q: ['help', 'support'], a: "Sure! I'm here to help. What do you need assistance with?" },
-        { q: ['name', 'who are you'], a: "I'm Nexi 🤖, your friendly assistant." },
-        { q: ['thank', 'thanks'], a: "You're welcome! 😊" },
-        { q: ['bye', 'exit', 'goodbye'], a: "Goodbye! Have a great day! 👋" },
-        { q: ['survey'], a: "You can take the survey here: 🎤 Survey page." },
-        { q: ['match result', 'match'], a: "Check your match results on the Match Result page 📊." },
-        { q: ['register', 'sign up'], a: "You can register on the Register page 📝." },
-        { q: ['login', 'sign in'], a: "Access your account through the Login page 🔐." },
-        { q: ['features', 'what can you do'], a: "I can help you navigate the site, answer questions, and provide info about Nestra." },
-        { q: ['contact', 'support email'], a: "You can reach support at support@nestra.com." },
-        { q: ['forgot password'], a: "Use the 'Forgot Password' link on the Login page to reset your password." },
-        { q: ['privacy', 'data'], a: "Your privacy is important to us. We protect your data according to our policy." },
-        { q: ['how to use', 'usage'], a: "Simply navigate through the menu to explore Nestra’s features and take surveys." },
-        { q: ['what is nestra'], a: "Nestra is a platform to find compatible roommates with AI-powered matching." },
-        { q: ['voice input'], a: "You can use the microphone button on the survey page to input answers via voice." },
-        { q: ['feedback'], a: "We appreciate your feedback! Please visit the Feedback page to share your thoughts." },
-        { q: ['bug', 'issue', 'problem'], a: "Sorry to hear that! Please report bugs on the Support page and we'll fix them ASAP." },
-        { q: ['terms', 'conditions'], a: "You can review our Terms & Conditions on the dedicated page linked at the footer." },
-        { q: ['about'], a: "Nestra is dedicated to creating safe and compatible living environments through smart matching." },
-        { q: ['hours', 'availability'], a: "Our platform is available 24/7 for you to access anytime." },
-        { q: ['payment', 'fees'], a: "Nestra is currently free to use. We’ll inform you about any future changes." }
-      ];
+        const response = await fetch('../backend/chatbot_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        });
 
-      for (const pair of qa) {
-        for (const keyword of pair.q) {
-          if (msg.includes(keyword)) {
-            return pair.a;
-          }
-        }
+        const data = await response.json();
+
+        // Ensure innerHTML is used for links
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', 'bot');
+        msgDiv.innerHTML = data.reply || "Sorry, I'm having trouble connecting to my brain right now! 😵";
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      } catch (error) {
+        appendMessage("Sorry, I'm offline at the moment! 😵", 'bot');
       }
-
-      return "Sorry, I didn't understand that. Could you please rephrase? 🤔";
     }
 
     chatForm.addEventListener('submit', (e) => {
@@ -343,12 +336,12 @@
       appendMessage(userMsg, 'user');
       chatInput.value = '';
 
-      // Simulate bot typing delay
+      // Create a temporary "typing" bubble if desired, or just wait.
       setTimeout(() => {
-        const botReply = getBotReply(userMsg);
-        appendMessage(botReply, 'bot');
-      }, 900);
+        fetchBotReply(userMsg);
+      }, 600);
     });
   </script>
 </body>
+
 </html>

@@ -33,14 +33,24 @@ if (!$current) {
     exit;
 }
 
-// ── Fetch all other users' latest surveys ──────────────────────────────────
+// ── Exclude Rejected Matches ───────────────────────────────────────────────
+$conn->query("CREATE TABLE IF NOT EXISTS match_rejects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    match_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY idx_pair (user_id, match_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+// ── Fetch all other users' latest surveys (ignoring rejected ones) ─────────
 $sql = "SELECT sr.*, u.fullname, u.email
         FROM survey_responses sr
         JOIN users u ON sr.user_id = u.id
-        WHERE sr.user_id != ?
+        WHERE sr.user_id != ? 
+          AND sr.user_id NOT IN (SELECT match_id FROM match_rejects WHERE user_id = ?)
         ORDER BY sr.submitted_at DESC";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("ii", $user_id, $user_id);
 $stmt->execute();
 $others = $stmt->get_result();
 $stmt->close();
@@ -173,13 +183,39 @@ while ($other = $others->fetch_assoc()) {
     ];
 }
 
-$conn->close();
-
 // Sort by compatibility descending
 usort($matches, fn($a, $b) => $b['compatibility'] <=> $a['compatibility']);
 
 // ── Store best match in session for match_result.html to read ──────────────
 $best = !empty($matches) ? $matches[0] : null;
+
+// ── Check mutual acceptance for the best match ──────────────────────────────
+if ($best) {
+    // Auto-create table
+    $conn->query("CREATE TABLE IF NOT EXISTS match_accepts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT,
+        match_id INT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY idx_pair (user_id, match_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    // Did I accept them?
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM match_accepts WHERE user_id=? AND match_id=?");
+    $stmt->bind_param("ii", $user_id, $best['user_id']);
+    $stmt->execute();
+    $best['i_accepted'] = $stmt->get_result()->fetch_row()[0] > 0;
+    $stmt->close();
+
+    // Did they accept me?
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM match_accepts WHERE user_id=? AND match_id=?");
+    $stmt->bind_param("ii", $best['user_id'], $user_id);
+    $stmt->execute();
+    $best['they_accepted'] = $stmt->get_result()->fetch_row()[0] > 0;
+    $stmt->close();
+}
+
+$conn->close();
 
 echo json_encode([
     'success' => true,
